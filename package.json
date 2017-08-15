@@ -4,8 +4,11 @@
   "private": true,
   "main": "src/electron-starter.js",
   "dependencies": {
+    "material-ui": "^1.0.0-beta.4",
+    "material-ui-icons": "^1.0.0-alpha.19",
     "react": "^15.6.1",
-    "react-dom": "^15.6.1"
+    "react-dom": "^15.6.1",
+    "typeface-roboto": "0.0.35"
   },
   "devDependencies": {
     "electron": "^1.7.5",
@@ -24,7 +27,7 @@
     "postinstall": "install-app-deps"
   },
   "build": {
-   "appId": "com.electron.electron-with-create-react-app",
+    "appId": "com.electron.electron-with-create-react-app",
     "win": {
       "iconUrl": "https://cdn2.iconfinder.com/data/icons/designer-skills/128/react-256.png"
     },

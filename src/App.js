@@ -1,18 +1,39 @@
-import React, { Component } from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { Component } from "react";
+import logo from "./logo.svg";
+import "./App.css";
+import "typeface-roboto";
+
+import Button from "material-ui/Button";
+import TextField from "material-ui/TextField";
+import Typography from "material-ui/Typography";
 
 class App extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = { results: "" };
+  }
+
+  handleClick = () => {
+    fetch("http://jsonplaceholder.typicode.com/posts", {
+      method: "GET",
+      mode: "cors"
+    }).then(response => {
+      response.json().then(json => {
+        console.log("RESPONSE", json);
+        this.setState({ results: JSON.stringify(json) });
+      });
+    });
+  };
+
   render() {
     return (
       <div className="App">
-        <div className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h2>Welcome to React</h2>
-        </div>
-        <p className="App-intro">
-          To get started, edit <code>src/App.js</code> and save to reload.
-        </p>
+        <TextField multiline rowsMax="12" />
+        <Button onClick={this.handleClick}>Send Request</Button>
+        <Typography>
+          {this.state.results}
+        </Typography>
       </div>
     );
   }
