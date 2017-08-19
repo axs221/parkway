@@ -6,7 +6,7 @@ export default class Editor extends Component {
   constructor(props) {
     super(props);
 
-    this.state = { text: "" };
+    this.state = { value: "" };
   }
 
   hasFocus = () => {
@@ -40,7 +40,7 @@ export default class Editor extends Component {
     console.log("TARGET", event.target.selectionStart);
 
     this.setState({
-      text: event.target.value
+      value: event.target.value
     });
 
     if (this.props.onChange) {
@@ -67,7 +67,9 @@ export default class Editor extends Component {
         textareaRef={ref => (this.textarea = ref)}
         rows={12}
         style={{ border: "thin solid black", height: "100%" }}
-        value={this.state.text}
+        value={
+          this.props.value !== undefined ? this.props.value : this.state.value
+        }
         onChange={this.onChange}
       />
     );

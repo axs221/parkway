@@ -4,6 +4,7 @@
   "private": true,
   "main": "src/electron-starter.js",
   "dependencies": {
+    "dot-object": "^1.6.0",
     "material-ui": "^1.0.0-beta.4",
     "material-ui-icons": "^1.0.0-alpha.19",
     "pretty-data": "^0.40.0",
