@@ -68,19 +68,24 @@ class App extends Component {
     }
 
     const newQueries = localStorage.getItem("queries") + "GET " + url;
+    authorization = authorization || this.state.authorization;
 
     this.setState({
-      authorization: authorization || this.state.authorization,
+      authorization,
       queries: newQueries,
+      selectedText: newQueries,
     });
 
     localStorage.setItem("queries", newQueries);
     localStorage.setItem("authorization", authorization);
+
+    this.sendRequest(url, "get", authorization);
   }
 
   handleClick = () => {
     let url;
     let method;
+    const authorization = this.state.authorization;
 
     var ranges = [];
 
@@ -102,11 +107,17 @@ class App extends Component {
       url = `http://${url}`;
     }
 
+    this.sendRequest(url, method, authorization);
+  };
+
+  sendRequest = (url, method, authorization) => {
+    console.log("url, method, authorization", url, method, authorization);
+
     fetch(url, {
       method: method,
       mode: "cors",
       headers: {
-        Authorization: localStorage.getItem("authorization"),
+        Authorization: authorization,
       },
     }).then(response => {
       response.json().then(json => {
