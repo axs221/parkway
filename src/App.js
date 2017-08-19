@@ -18,7 +18,9 @@ class App extends Component {
 
     this.state = {
       filter: "",
-      text: "GET https://jsonplaceholder.typicode.com/comments",
+      // text: "GET https://jsonplaceholder.typicode.com/comments",
+      text:
+        "GET https://qa-api.ambyint.com/optimization/well/01-010-20202-02-02/commissioning",
       results: ""
     };
   }
@@ -45,7 +47,11 @@ class App extends Component {
 
     fetch(url, {
       method: method,
-      mode: "cors"
+      mode: "cors",
+      headers: {
+        Authorization:
+          "Basic eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjbGllbnRVc2VySWQiOiJjMjY0NTQzYy1mZDU1LTQ3NTAtOWJmZS00ODE5ZGJkMmNlMmQiLCJlbWFpbCI6InNoYXduLmF4c29tQGFtYnlpbnQuY29tIiwiaWF0IjoxNTAzMTUxODAzLCJleHAiOjE1MDQzNjE0MDN9.4mFjv49UhQ44VTlsVq8TjlXUV3oUd4F4wHDb6l5SnUM"
+      }
     }).then(response => {
       response.json().then(json => {
         this.setState({ results: json });
@@ -63,18 +69,23 @@ class App extends Component {
         filteredResults &&
         JSON.stringify(filteredResults) !== JSON.stringify({})
       ) {
-        this.lastSuccessfulFilter = this.state.filter;
         results = filteredResults;
-      } else if (this.lastSuccessfulFilter) {
-        results = dot.pick(this.lastSuccessfulFilter, results);
+      } else {
+        // Probably changing the filter, don't update anything until it matches successfully
+        console.log("this.lastFilteredResults", this.lastFilteredResults);
+
+        return this.lastFilteredResults;
       }
     }
 
     try {
       const formatted = pd.json(results || {});
+      results = formatted || results;
 
-      return formatted || results;
+      this.lastFilteredResults = results;
+      return results;
     } catch (error) {
+      this.lastFilteredResults = results;
       return results;
     }
   };
