@@ -34,14 +34,16 @@ class App extends Component {
     });
 
     this.state = {
+      authorization: localStorage.getItem("authorization"),
       filter: "",
-      text: localStorage.getItem("queries"),
       results: "",
+      queries: localStorage.getItem("queries"),
     };
   }
 
   handleParsedCurl(text) {
     let url = "";
+    let authorization = "";
 
     const tokens = text.trim().split(" ");
 
@@ -50,10 +52,16 @@ class App extends Component {
     for (var index = 0; index < tokens.length; index++) {
       var element = tokens[index];
 
-      if (element.includes("http") && !url) {
+      if (element.toLowerCase().includes("http") && !url) {
         url = element;
         url = url.replace("'", "").replace('"', "");
         url = url.replace("'", "").replace('"', "");
+      }
+
+      if (element.toLowerCase().includes("authorization")) {
+        authorization = tokens[index + 1] + " " + tokens[index + 2];
+        authorization = authorization.replace("'", "").replace('"', "");
+        authorization = authorization.replace("'", "").replace('"', "");
       }
 
       console.log("element", element);
@@ -62,10 +70,12 @@ class App extends Component {
     const newQueries = localStorage.getItem("queries") + "GET " + url;
 
     this.setState({
-      text: newQueries,
+      authorization: authorization || this.state.authorization,
+      queries: newQueries,
     });
 
     localStorage.setItem("queries", newQueries);
+    localStorage.setItem("authorization", authorization);
   }
 
   handleClick = () => {
@@ -79,9 +89,13 @@ class App extends Component {
       method = tokens[0];
       url = tokens[1];
     } else {
-      const tokens = this.state.text.split(" ");
+      const tokens = this.state.queries.split(" ");
       method = tokens[0];
       url = tokens[1];
+    }
+
+    if (!url) {
+      return;
     }
 
     if (url.indexOf("http") === -1) {
@@ -234,23 +248,30 @@ class App extends Component {
               <TextField
                 placeholder="Authorization"
                 style={{width: 400}}
-                value={localStorage.getItem("authorization")}
-                onChange={event =>
-                  localStorage.setItem("authorization", event.target.value)}
+                value={this.state.authorization}
+                onChange={event => {
+                  this.setState({
+                    authorization: event.target.value,
+                  });
+                  localStorage.setItem("authorization", event.target.value);
+                }}
               />
             </div>
 
             <Editor
-              value={this.state.text}
+              value={this.state.queries}
               onChange={event => {
                 this.setState({
-                  text: event.target.value,
+                  queries: event.target.value,
                 });
 
                 localStorage.setItem("queries", event.target.value);
               }}
-              onSelectionChanged={selectedText => {
-                this.setState({selectedText: selectedText()});
+              onSelectionChanged={selectedTextFunc => {
+                const selectedText = selectedTextFunc();
+                if (selectedText) {
+                  this.setState({selectedText});
+                }
               }}
             />
             <Button onClick={this.handleClick}>Send Request</Button>
@@ -266,12 +287,14 @@ class App extends Component {
                   ),
                 })}
             />
-            <Button onClick={this.removeFilterLevel}>
-              {"<"}
-            </Button>
-            <Button onClick={this.removeFilter}>
-              {"X"}
-            </Button>
+            <div>
+              <Button onClick={this.removeFilterLevel}>
+                {"<"}
+              </Button>
+              <Button onClick={this.removeFilter}>
+                {"X"}
+              </Button>
+            </div>
             {this.renderJsonParts()}
           </Grid>
 
