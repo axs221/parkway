@@ -19,9 +19,7 @@ class App extends Component {
 
     this.state = {
       filter: "",
-      // text: "GET https://jsonplaceholder.typicode.com/comments",
-      text:
-        "GET https://qa-api.ambyint.com/optimization/well/01-010-20202-02-02/commissioning",
+      text: localStorage.getItem("queries"),
       results: ""
     };
   }
@@ -176,6 +174,13 @@ class App extends Component {
     });
   };
 
+  removeFilter = () => {
+    this.setState({
+      filter: "",
+      filteredResults: this.filter(this.state.results, "")
+    });
+  };
+
   render() {
     return (
       <div className="App">
@@ -193,10 +198,13 @@ class App extends Component {
 
             <Editor
               value={this.state.text}
-              onChange={event =>
+              onChange={event => {
                 this.setState({
                   text: event.target.value
-                })}
+                });
+
+                localStorage.setItem("queries", event.target.value);
+              }}
               onSelectionChanged={selectedText => {
                 this.setState({ selectedText: selectedText() });
               }}
@@ -214,7 +222,12 @@ class App extends Component {
                   )
                 })}
             />
-            <Button onClick={this.removeFilterLevel}>x</Button>
+            <Button onClick={this.removeFilterLevel}>
+              {"<"}
+            </Button>
+            <Button onClick={this.removeFilter}>
+              {"X"}
+            </Button>
             {this.renderJsonParts()}
           </Grid>
 
