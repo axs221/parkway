@@ -5,9 +5,11 @@ import "typeface-roboto";
 
 import Button from "material-ui/Button";
 import Grid from "material-ui/Grid";
-import Typography from "material-ui/Typography";
+import pre from "material-ui/Typography";
 
 import Editor from "./components/Editor";
+
+import { pd } from "pretty-data";
 
 class App extends Component {
   constructor(props) {
@@ -46,8 +48,8 @@ class App extends Component {
       mode: "cors"
     }).then(response => {
       response.json().then(json => {
-        console.log("RESPONSE", json);
-        this.setState({ results: JSON.stringify(json) });
+        console.log("RESPONSE", pd.json(json));
+        this.setState({ results: pd.json(json) });
       });
     });
   };
@@ -56,7 +58,7 @@ class App extends Component {
     return (
       <div className="App">
         <Grid container>
-          <Grid item xs={8}>
+          <Grid item xs={5}>
             <Editor
               onChange={event => this.setState({ text: event.target.value })}
               onSelectionChanged={selectedText => {
@@ -67,10 +69,10 @@ class App extends Component {
             />
             <Button onClick={this.handleClick}>Send Request</Button>
           </Grid>
-          <Grid item xs={4}>
-            <Typography>
-              {this.state.results}
-            </Typography>
+          <Grid item xs={7}>
+            <pre style={{ textAlign: "left" }}>
+              {pd.json(this.state.results || {})}
+            </pre>
           </Grid>
         </Grid>
       </div>
