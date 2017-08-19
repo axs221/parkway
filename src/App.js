@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, {Component} from "react";
 import logo from "./logo.svg";
 import "./App.css";
 import "typeface-roboto";
@@ -11,17 +11,61 @@ import TextField from "material-ui/TextField";
 import Editor from "./components/Editor";
 
 import dot from "dot-object";
-import { pd } from "pretty-data";
+import {pd} from "pretty-data";
 
 class App extends Component {
   constructor(props) {
     super(props);
 
+    document.addEventListener("paste", event => {
+      console.log("event", event);
+      console.log(
+        "var clipboardText = clipboardData.getData('Text')",
+        event.clipboardData.getData("Text"),
+      );
+
+      const clipboardText = event.clipboardData.getData("Text");
+
+      if (clipboardText.toLowerCase().includes("curl")) {
+        event.preventDefault();
+
+        this.handleParsedCurl(clipboardText);
+      }
+    });
+
     this.state = {
       filter: "",
       text: localStorage.getItem("queries"),
-      results: ""
+      results: "",
     };
+  }
+
+  handleParsedCurl(text) {
+    let url = "";
+
+    const tokens = text.trim().split(" ");
+
+    console.log("tokens", tokens);
+
+    for (var index = 0; index < tokens.length; index++) {
+      var element = tokens[index];
+
+      if (element.includes("http") && !url) {
+        url = element;
+        url = url.replace("'", "").replace('"', "");
+        url = url.replace("'", "").replace('"', "");
+      }
+
+      console.log("element", element);
+    }
+
+    const newQueries = localStorage.getItem("queries") + "GET " + url;
+
+    this.setState({
+      text: newQueries,
+    });
+
+    localStorage.setItem("queries", newQueries);
   }
 
   handleClick = () => {
@@ -48,13 +92,13 @@ class App extends Component {
       method: method,
       mode: "cors",
       headers: {
-        Authorization: localStorage.getItem("authorization")
-      }
+        Authorization: localStorage.getItem("authorization"),
+      },
     }).then(response => {
       response.json().then(json => {
         this.setState({
           results: json,
-          filteredResults: this.filter(json, this.state.filter)
+          filteredResults: this.filter(json, this.state.filter),
         });
       });
     });
@@ -102,14 +146,14 @@ class App extends Component {
     return (
       <div>
         <div
-          style={{ cursor: "pointer", margin: 8 }}
+          style={{cursor: "pointer", margin: 8}}
           onClick={() => {
             const newFilter = this.state.filter
               ? `${this.state.filter}.${key}`
               : key;
             this.setState({
               filter: newFilter,
-              filteredResults: this.filter(this.state.results, newFilter)
+              filteredResults: this.filter(this.state.results, newFilter),
             });
           }}
         >
@@ -141,16 +185,16 @@ class App extends Component {
       .map(key => this.renderJsonPartButton(key));
 
     return (
-      <Grid container style={{ margin: 16 }}>
+      <Grid container style={{margin: 16}}>
         <Grid item xs={6}>
-          <Paper style={{ padding: "8px", textAlign: "left" }}>
-            <div style={{ color: "#ea4" }}>Objects</div>
+          <Paper style={{padding: "8px", textAlign: "left"}}>
+            <div style={{color: "#ea4"}}>Objects</div>
             {objects}
           </Paper>
         </Grid>
         <Grid item xs={6}>
-          <Paper style={{ padding: "8px", textAlign: "left" }}>
-            <div style={{ color: "#ea4" }}>Primitives</div>
+          <Paper style={{padding: "8px", textAlign: "left"}}>
+            <div style={{color: "#ea4"}}>Primitives</div>
             {primitives}
           </Paper>
         </Grid>
@@ -170,26 +214,26 @@ class App extends Component {
 
     this.setState({
       filter: newFilter,
-      filteredResults: this.filter(this.state.results, newFilter)
+      filteredResults: this.filter(this.state.results, newFilter),
     });
   };
 
   removeFilter = () => {
     this.setState({
       filter: "",
-      filteredResults: this.filter(this.state.results, "")
+      filteredResults: this.filter(this.state.results, ""),
     });
   };
 
   render() {
     return (
       <div className="App">
-        <Grid container style={{ padding: 16 }}>
+        <Grid container style={{padding: 16}}>
           <Grid item xs={6}>
             <div>
               <TextField
                 placeholder="Authorization"
-                style={{ width: 400 }}
+                style={{width: 400}}
                 value={localStorage.getItem("authorization")}
                 onChange={event =>
                   localStorage.setItem("authorization", event.target.value)}
@@ -200,26 +244,26 @@ class App extends Component {
               value={this.state.text}
               onChange={event => {
                 this.setState({
-                  text: event.target.value
+                  text: event.target.value,
                 });
 
                 localStorage.setItem("queries", event.target.value);
               }}
               onSelectionChanged={selectedText => {
-                this.setState({ selectedText: selectedText() });
+                this.setState({selectedText: selectedText()});
               }}
             />
             <Button onClick={this.handleClick}>Send Request</Button>
             <TextField
-              style={{ width: 400 }}
+              style={{width: 400}}
               value={this.state.filter}
               onChange={event =>
                 this.setState({
                   filter: event.target.value,
                   filteredResults: this.filter(
                     this.state.results,
-                    event.target.value
-                  )
+                    event.target.value,
+                  ),
                 })}
             />
             <Button onClick={this.removeFilterLevel}>
@@ -232,7 +276,7 @@ class App extends Component {
           </Grid>
 
           <Grid item xs={6}>
-            <pre style={{ textAlign: "left" }}>
+            <pre style={{textAlign: "left"}}>
               {this.format(this.state.filteredResults)}
             </pre>
           </Grid>
