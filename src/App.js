@@ -5,6 +5,7 @@ import "typeface-roboto";
 
 import Button from "material-ui/Button";
 import Grid from "material-ui/Grid";
+import Paper from "material-ui/Paper";
 import TextField from "material-ui/TextField";
 
 import Editor from "./components/Editor";
@@ -49,33 +50,40 @@ class App extends Component {
       method: method,
       mode: "cors",
       headers: {
-        Authorization:
-          "Basic eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjbGllbnRVc2VySWQiOiJjMjY0NTQzYy1mZDU1LTQ3NTAtOWJmZS00ODE5ZGJkMmNlMmQiLCJlbWFpbCI6InNoYXduLmF4c29tQGFtYnlpbnQuY29tIiwiaWF0IjoxNTAzMTUxODAzLCJleHAiOjE1MDQzNjE0MDN9.4mFjv49UhQ44VTlsVq8TjlXUV3oUd4F4wHDb6l5SnUM"
+        Authorization: localStorage.getItem("authorization")
       }
     }).then(response => {
       response.json().then(json => {
-        this.setState({ results: json });
+        this.setState({
+          results: json,
+          filteredResults: this.filter(json, this.state.filter)
+        });
       });
     });
   };
 
-  filterAndFormat = () => {
-    let results = this.state.results;
-
-    if (this.state.filter) {
-      const filteredResults = dot.pick(this.state.filter, results);
+  filter = (results, filter) => {
+    if (filter) {
+      const filteredResults = dot.pick(filter, results);
 
       if (
-        filteredResults &&
+        filteredResults !== undefined &&
         JSON.stringify(filteredResults) !== JSON.stringify({})
       ) {
         results = filteredResults;
       } else {
-        // Probably changing the filter, don't update anything until it matches successfully
-        console.log("this.lastFilteredResults", this.lastFilteredResults);
-
         return this.lastFilteredResults;
       }
+
+      console.log("results, filteredResults", results, filteredResults);
+    }
+
+    return results;
+  };
+
+  format = results => {
+    if (results === null) {
+      return "null";
     }
 
     try {
@@ -90,11 +98,99 @@ class App extends Component {
     }
   };
 
+  renderJsonPartButton = key => {
+    const keyTrimmed = key.slice(0, Math.min(key.length, 25));
+
+    return (
+      <div>
+        <div
+          style={{ cursor: "pointer", margin: 8 }}
+          onClick={() => {
+            const newFilter = this.state.filter
+              ? `${this.state.filter}.${key}`
+              : key;
+            this.setState({
+              filter: newFilter,
+              filteredResults: this.filter(this.state.results, newFilter)
+            });
+          }}
+        >
+          {keyTrimmed === key ? key : `${keyTrimmed}...`}
+        </div>
+      </div>
+    );
+  };
+
+  renderJsonParts = () => {
+    const results = this.state.filteredResults;
+
+    if (
+      typeof results !== "object" ||
+      results === null ||
+      results === undefined
+    ) {
+      return null;
+    }
+
+    const primitives = Object.keys(results)
+      .filter(key => typeof results[key] !== "object")
+      .sort()
+      .map(key => this.renderJsonPartButton(key));
+
+    const objects = Object.keys(results)
+      .filter(key => typeof results[key] === "object")
+      .sort()
+      .map(key => this.renderJsonPartButton(key));
+
+    return (
+      <Grid container style={{ margin: 16 }}>
+        <Grid item xs={6}>
+          <Paper style={{ padding: "8px", textAlign: "left" }}>
+            <div style={{ color: "#ea4" }}>Objects</div>
+            {objects}
+          </Paper>
+        </Grid>
+        <Grid item xs={6}>
+          <Paper style={{ padding: "8px", textAlign: "left" }}>
+            <div style={{ color: "#ea4" }}>Primitives</div>
+            {primitives}
+          </Paper>
+        </Grid>
+      </Grid>
+    );
+  };
+
+  removeFilterLevel = () => {
+    let newFilter;
+    const lastPeriod = this.state.filter.lastIndexOf(".");
+
+    if (lastPeriod >= 0) {
+      newFilter = this.state.filter.slice(0, lastPeriod);
+    } else {
+      newFilter = "";
+    }
+
+    this.setState({
+      filter: newFilter,
+      filteredResults: this.filter(this.state.results, newFilter)
+    });
+  };
+
   render() {
     return (
       <div className="App">
-        <Grid container>
-          <Grid item xs={5}>
+        <Grid container style={{ padding: 16 }}>
+          <Grid item xs={6}>
+            <div>
+              <TextField
+                placeholder="Authorization"
+                style={{ width: 400 }}
+                value={localStorage.getItem("authorization")}
+                onChange={event =>
+                  localStorage.setItem("authorization", event.target.value)}
+              />
+            </div>
+
             <Editor
               value={this.state.text}
               onChange={event =>
@@ -107,13 +203,24 @@ class App extends Component {
             />
             <Button onClick={this.handleClick}>Send Request</Button>
             <TextField
+              style={{ width: 400 }}
               value={this.state.filter}
-              onChange={event => this.setState({ filter: event.target.value })}
+              onChange={event =>
+                this.setState({
+                  filter: event.target.value,
+                  filteredResults: this.filter(
+                    this.state.results,
+                    event.target.value
+                  )
+                })}
             />
+            <Button onClick={this.removeFilterLevel}>x</Button>
+            {this.renderJsonParts()}
           </Grid>
-          <Grid item xs={7}>
+
+          <Grid item xs={6}>
             <pre style={{ textAlign: "left" }}>
-              {this.filterAndFormat(this.state.results)}
+              {this.format(this.state.filteredResults)}
             </pre>
           </Grid>
         </Grid>
