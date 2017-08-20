@@ -8,6 +8,8 @@ import Grid from "material-ui/Grid";
 import Paper from "material-ui/Paper";
 import TextField from "material-ui/TextField";
 
+import {flatMap} from "lodash";
+
 import Editor from "./components/Editor";
 
 import dot from "dot-object";
@@ -199,28 +201,45 @@ class App extends Component {
       return null;
     }
 
-    const primitives = Object.keys(results)
-      .filter(key => typeof results[key] !== "object")
-      .sort()
-      .map(key => this.renderJsonPartButton(key));
+    const sortedPrimitives = Object.keys(results)
+      .filter(key => typeof results[key] !== "object" || results[key] === null)
+      .sort();
+
+    const primitivesWithValues = flatMap(sortedPrimitives, key => [
+      <div
+        style={{
+          textDecoration: "underline green",
+        }}
+      >
+        {key}
+      </div>,
+      <div
+        style={{
+          color: "#777",
+          margin: "2px 0 8px 16px",
+        }}
+      >
+        {results[key]}
+      </div>,
+    ]);
 
     const objects = Object.keys(results)
-      .filter(key => typeof results[key] === "object")
+      .filter(key => typeof results[key] === "object" && results[key] !== null)
       .sort()
       .map(key => this.renderJsonPartButton(key));
 
     return (
-      <Grid container style={{margin: 16}}>
-        <Grid item xs={6}>
-          <Paper style={{padding: "8px", textAlign: "left"}}>
-            <div style={{color: "#ea4"}}>Objects</div>
-            {objects}
+      <Grid container>
+        <Grid item xs={7}>
+          <Paper style={{padding: "8px", textAlign: "left", minHeight: 20}}>
+            <div style={{color: "#ea4"}}>Primitives</div>
+            {primitivesWithValues}
           </Paper>
         </Grid>
-        <Grid item xs={6}>
-          <Paper style={{padding: "8px", textAlign: "left"}}>
-            <div style={{color: "#ea4"}}>Primitives</div>
-            {primitives}
+        <Grid item xs={5}>
+          <Paper style={{padding: "8px", textAlign: "left", minHeight: 20}}>
+            <div style={{color: "#ea4"}}>Objects</div>
+            {objects}
           </Paper>
         </Grid>
       </Grid>

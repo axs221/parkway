@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, {Component} from "react";
 
 import Textarea from "material-ui/Input/Textarea";
 
@@ -6,7 +6,7 @@ export default class Editor extends Component {
   constructor(props) {
     super(props);
 
-    this.state = { value: "" };
+    this.state = {value: ""};
   }
 
   hasFocus = () => {
@@ -40,7 +40,7 @@ export default class Editor extends Component {
     console.log("TARGET", event.target.selectionStart);
 
     this.setState({
-      value: event.target.value
+      value: event.target.value,
     });
 
     if (this.props.onChange) {
@@ -52,7 +52,7 @@ export default class Editor extends Component {
     document.addEventListener("selectionchange", event => {
       if (this.hasFocus()) {
         this.setState({
-          selectedText: window.getSelection().toString()
+          selectedText: window.getSelection().toString(),
         });
 
         this.props.onSelectionChanged(this.getSelectedText);
@@ -65,8 +65,8 @@ export default class Editor extends Component {
       <Textarea
         className="editor"
         textareaRef={ref => (this.textarea = ref)}
-        rows={12}
-        style={{ border: "thin solid black", height: "100%" }}
+        rows={4}
+        style={{border: "thin solid black", height: "100%"}}
         value={
           this.props.value !== undefined ? this.props.value : this.state.value
         }
