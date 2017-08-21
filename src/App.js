@@ -3,10 +3,13 @@ import logo from "./logo.svg";
 import "./App.css";
 import "typeface-roboto";
 
+import AppBar from "material-ui/AppBar";
 import Button from "material-ui/Button";
 import Grid from "material-ui/Grid";
 import Paper from "material-ui/Paper";
 import TextField from "material-ui/TextField";
+import Toolbar from "material-ui/Toolbar";
+import Typography from "material-ui/Typography";
 
 import {flatMap} from "lodash";
 
@@ -272,68 +275,85 @@ class App extends Component {
   render() {
     return (
       <div className="App">
-        <Grid container style={{padding: 16}}>
-          <Grid item xs={6}>
-            <div>
-              <TextField
-                placeholder="Authorization"
-                style={{width: 400}}
-                value={this.state.authorization}
+        <AppBar
+          style={{
+            webkitAppRegion: "drag",
+            cursor: "pointer",
+          }}
+          position="static"
+          color="default"
+        >
+          <Toolbar>
+            <Typography type="title" color="inherit">
+              Parkway
+            </Typography>
+          </Toolbar>
+        </AppBar>
+
+        <div className="container">
+          <Grid container style={{padding: 16}}>
+            <Grid item xs={6}>
+              <div>
+                <TextField
+                  placeholder="Authorization"
+                  style={{width: 400}}
+                  value={this.state.authorization}
+                  onChange={event => {
+                    this.setState({
+                      authorization: event.target.value,
+                    });
+                    localStorage.setItem("authorization", event.target.value);
+                  }}
+                />
+              </div>
+
+              <Editor
+                value={this.state.queries}
                 onChange={event => {
                   this.setState({
-                    authorization: event.target.value,
+                    queries: event.target.value,
                   });
-                  localStorage.setItem("authorization", event.target.value);
+
+                  localStorage.setItem("queries", event.target.value);
+                }}
+                onSelectionChanged={selectedTextFunc => {
+                  const selectedText = selectedTextFunc();
+                  if (selectedText) {
+                    this.setState({selectedText});
+                  }
                 }}
               />
-            </div>
+              <Button onClick={this.handleClick}>Send Request</Button>
+              <TextField
+                style={{width: 400}}
+                value={this.state.filter}
+                onChange={event =>
+                  this.setState({
+                    filter: event.target.value,
+                    filteredResults: this.filter(
+                      this.state.results,
+                      event.target.value,
+                    ),
+                  })}
+              />
+              <div>
+                <Button onClick={this.removeFilterLevel}>
+                  {"<"}
+                </Button>
+                <Button onClick={this.removeFilter}>
+                  {"X"}
+                </Button>
+              </div>
+              {this.renderJsonParts()}
+            </Grid>
 
-            <Editor
-              value={this.state.queries}
-              onChange={event => {
-                this.setState({
-                  queries: event.target.value,
-                });
-
-                localStorage.setItem("queries", event.target.value);
-              }}
-              onSelectionChanged={selectedTextFunc => {
-                const selectedText = selectedTextFunc();
-                if (selectedText) {
-                  this.setState({selectedText});
-                }
-              }}
-            />
-            <Button onClick={this.handleClick}>Send Request</Button>
-            <TextField
-              style={{width: 400}}
-              value={this.state.filter}
-              onChange={event =>
-                this.setState({
-                  filter: event.target.value,
-                  filteredResults: this.filter(
-                    this.state.results,
-                    event.target.value,
-                  ),
-                })}
-            />
-            <div>
-              <Button onClick={this.removeFilterLevel}>
-                {"<"}
-              </Button>
-              <Button onClick={this.removeFilter}>
-                {"X"}
-              </Button>
-            </div>
-            {this.renderJsonParts()}
+            <Grid item xs={6}>
+              <pre style={{textAlign: "left"}}>
+                {this.format(this.state.filteredResults)}
+              </pre>
+            </Grid>
           </Grid>
-
-          <Grid item xs={6}>
-            <pre style={{textAlign: "left"}}>
-              {this.format(this.state.filteredResults)}
-            </pre>
-          </Grid>
-        </Grid>
+        </div>
       </div>
     );
   }
