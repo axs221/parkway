@@ -42,6 +42,7 @@ class App extends Component {
       authorization: localStorage.getItem("authorization"),
       filter: "",
       results: "",
+      selectedText: localStorage.getItem("selectedText"),
       queries: localStorage.getItem("queries"),
     };
   }
@@ -320,6 +321,7 @@ class App extends Component {
                   const selectedText = selectedTextFunc();
                   if (selectedText) {
                     this.setState({selectedText});
+                    localStorage.setItem("selectedText", selectedText);
                   }
                 }}
               />
