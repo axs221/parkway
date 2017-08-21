@@ -1,5 +1,4 @@
 import React, {Component} from "react";
-import logo from "./logo.svg";
 import "./App.css";
 import "typeface-roboto";
 
@@ -274,11 +273,12 @@ class App extends Component {
   };
 
   render() {
+    console.log("APP RENDER");
     return (
       <div className="App">
         <AppBar
           style={{
-            webkitAppRegion: "drag",
+            WebkitAppRegion: "drag",
             cursor: "pointer",
           }}
           position="static"
@@ -324,6 +324,7 @@ class App extends Component {
                     localStorage.setItem("selectedText", selectedText);
                   }
                 }}
+                selectedText={this.state.selectedText}
               />
               <Button onClick={this.handleClick}>Send Request</Button>
               <TextField

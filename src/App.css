@@ -1,7 +1,6 @@
-.App {
+.highlight {
   text-align: center;
-}
-
-.container {
-  background: "red";
+  background-color: #fdc;
+  font-size: 14px;
+  font-family: Roboto;
 }
